@@ -1,0 +1,45 @@
+.chessTile {
+    width: 64px;;
+    height: 64px;
+    transition: background-color 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    overflow: hidden;
+}
+
+.chessTile:hover {
+    cursor: pointer;
+}
+
+.chessTile.light {
+    background-color: #b9e1e4
+}
+
+.chessTile.dark {
+    background-color: #659194;
+}
+
+.chessTile.light:hover {
+    background-color: #cffcff;
+}
+
+.chessTile.dark:hover { 
+    background-color: #cffcff;
+}
+
+.chessTile.selected, .chessTile.selected:hover {
+    background-color: #eeee18;
+}
+
+.chessTile.canMove {
+    background-color: #26a826;
+}
+
+.chessTile.canMove:hover {
+    background-color: #3fe03f;
+}
+
+.pieceIcon {
+}

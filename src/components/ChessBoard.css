@@ -1,0 +1,35 @@
+.chessBoard {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    border: 2px solid black;
+    border-radius: 4px;
+    width: 512px;
+    position: relative;
+}
+
+.chessRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.chessUI {
+    border: 2px solid black;
+    border-radius: 4px;
+    width: 512px;
+    margin: 20px;
+}
+
+.turnCounter {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.captureCounter {
+    font-size: 20px;
+}
+
+.chessUI p {
+    margin: 0px;
+}
