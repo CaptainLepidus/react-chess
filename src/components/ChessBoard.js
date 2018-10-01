@@ -12,9 +12,8 @@ export default class ChessBoard extends React.Component {
     constructor(props) {
         super(props);
 
-        let width = 8;
-        let height = 8;
-        let board = this.setupBoard(width, height);
+        let width = 8, height = 8; // standard chess board size
+        let board = setupBoard(width, height);
 
         this.state = {
             board: board,
@@ -30,115 +29,14 @@ export default class ChessBoard extends React.Component {
         }
     }
 
-    setupBoard = (width, height) => {
-        let board = [];
-
-        for (let y = 0; y < height; y++) {
-            board[y] = [];
-            for (let x = 0; x < width; x++) {
-                board[y][x] = null;
-            }
-        }
-
-        /* Setup pieces */
-
-        /* Pawns*/
-        for(let x = 0; x < width; x++) {
-            board[1][x] = {
-                type: PIECES.PAWN,
-                side: SIDES.BLACK
-            }
-            board[6][x] = {
-                type: PIECES.PAWN,
-                side: SIDES.WHITE
-            }
-        }
-
-        /* Rooks */
-        board[0][0] = {
-            type: PIECES.ROOK,
-            side: SIDES.BLACK
-        }
-        board[0][7] = {
-            type: PIECES.ROOK,
-            side: SIDES.BLACK
-        }
-        board[7][0] = {
-            type: PIECES.ROOK,
-            side: SIDES.WHITE
-        }
-        board[7][7] = {
-            type: PIECES.ROOK,
-            side: SIDES.WHITE
-        }
-
-        /* Knights */
-        board[0][1] = {
-            type: PIECES.KNIGHT,
-            side: SIDES.BLACK
-        }
-        board[0][6] = {
-            type: PIECES.KNIGHT,
-            side: SIDES.BLACK
-        }
-        board[7][1] = {
-            type: PIECES.KNIGHT,
-            side: SIDES.WHITE
-        }
-        board[7][6] = {
-            type: PIECES.KNIGHT,
-            side: SIDES.WHITE
-        }
-
-        /* Bishops */
-        board[0][2] = {
-            type: PIECES.BISHOP,
-            side: SIDES.BLACK
-        }
-        board[0][5] = {
-            type: PIECES.BISHOP,
-            side: SIDES.BLACK
-        }
-        board[7][2] = {
-            type: PIECES.BISHOP,
-            side: SIDES.WHITE
-        }
-        board[7][5] = {
-            type: PIECES.BISHOP,
-            side: SIDES.WHITE
-        }
-
-        /* Queens */
-        board[0][3] = {
-            type: PIECES.QUEEN,
-            side: SIDES.BLACK
-        }
-        board[7][3] = {
-            type: PIECES.QUEEN,
-            side: SIDES.WHITE
-        }
-
-        /* Kings */
-        board[0][4] = {
-            type: PIECES.KING,
-            side: SIDES.BLACK
-        }
-        board[7][4] = {
-            type: PIECES.KING,
-            side: SIDES.WHITE
-        }
-
-        return board;
-    }
-
     canSelectedPieceMoveTo = (position) => {
         let select = this.state.selected;
         if (select !== null) {
             let selectedPiece = this.state.board[select.y][select.x];
-            if (selectedPiece !== null && selectedPiece.side === this.state.turn) {
-                if (selectedPiece.type.canMove(select, position, selectedPiece.side, this.state.board, selectedPiece.hasMoved !== undefined)) {
+            if (selectedPiece !== null && selectedPiece.side === this.state.turn) { // If we have a piece selected && that piece is the right color
+                if (selectedPiece.type.canMove(select, position, selectedPiece.side, this.state.board, selectedPiece.hasMoved !== undefined)) { // Check movement rules for that piece
                     let targetPiece = this.state.board[position.y][position.x];
-                    if (targetPiece === null || targetPiece.side !== selectedPiece.side) {
+                    if (targetPiece === null || targetPiece.side !== selectedPiece.side) { // We can land either in an empty space or in the space of an enemy piece
                         if (selectedPiece.type.canHop) return true; // Knights don't care about unit collisions
                         let directionVector = {x: Math.sign(position.x - select.x), y: Math.sign(position.y - select.y)};
                         let x = select.x + directionVector.x, y = select.y + directionVector.y; // Start one tile away from our original position
@@ -168,13 +66,13 @@ export default class ChessBoard extends React.Component {
                 let captures = this.state.captures;
                 if (targetPiece !== null) {
                     let capturedAmount = captures[selectedPiece.side][targetPiece.type.name];
-                    captures[selectedPiece.side][targetPiece.type.name] = capturedAmount ? capturedAmount + 1 : 1;
+                    captures[selectedPiece.side][targetPiece.type.name] = capturedAmount ? capturedAmount + 1 : 1; // increase the capture count
                 }
                 board[position.y][position.x] = selectedPiece;
                 board[select.y][select.x] = null;
                 let turn = (this.state.turn === SIDES.WHITE) ? SIDES.BLACK : SIDES.WHITE;
                 this.setState({board: board, turn: turn, selected: null});
-                return;
+                return; // We don't want to select the tile after we have just moved there
             }
         }
         this.setState({selected: position})
@@ -206,7 +104,7 @@ export default class ChessBoard extends React.Component {
     }
 
     startOver = () => {
-        let board = this.setupBoard(this.state.width, this.state.height);
+        let board = setupBoard(this.state.width, this.state.height);
         this.setState({board: board, captures: {0: {}, 1: {}}, turn: SIDES.WHITE});
     }
 
@@ -237,4 +135,110 @@ export default class ChessBoard extends React.Component {
             </div>
         )
     }
+}
+
+
+/**
+ * Fills a board with given width and height
+ * Will produce weird results for anything other than 8x8
+ */
+const setupBoard = (width, height) => {
+    let board = [];
+
+    for (let y = 0; y < height; y++) {
+        board[y] = [];
+        for (let x = 0; x < width; x++) {
+            board[y][x] = null;
+        }
+    }
+
+    /* Setup pieces */
+
+    /* Pawns*/
+    for(let x = 0; x < width; x++) {
+        board[1][x] = {
+            type: PIECES.PAWN,
+            side: SIDES.BLACK
+        }
+        board[6][x] = {
+            type: PIECES.PAWN,
+            side: SIDES.WHITE
+        }
+    }
+
+    /* Rooks */
+    board[0][0] = {
+        type: PIECES.ROOK,
+        side: SIDES.BLACK
+    }
+    board[0][7] = {
+        type: PIECES.ROOK,
+        side: SIDES.BLACK
+    }
+    board[7][0] = {
+        type: PIECES.ROOK,
+        side: SIDES.WHITE
+    }
+    board[7][7] = {
+        type: PIECES.ROOK,
+        side: SIDES.WHITE
+    }
+
+    /* Knights */
+    board[0][1] = {
+        type: PIECES.KNIGHT,
+        side: SIDES.BLACK
+    }
+    board[0][6] = {
+        type: PIECES.KNIGHT,
+        side: SIDES.BLACK
+    }
+    board[7][1] = {
+        type: PIECES.KNIGHT,
+        side: SIDES.WHITE
+    }
+    board[7][6] = {
+        type: PIECES.KNIGHT,
+        side: SIDES.WHITE
+    }
+
+    /* Bishops */
+    board[0][2] = {
+        type: PIECES.BISHOP,
+        side: SIDES.BLACK
+    }
+    board[0][5] = {
+        type: PIECES.BISHOP,
+        side: SIDES.BLACK
+    }
+    board[7][2] = {
+        type: PIECES.BISHOP,
+        side: SIDES.WHITE
+    }
+    board[7][5] = {
+        type: PIECES.BISHOP,
+        side: SIDES.WHITE
+    }
+
+    /* Queens */
+    board[0][3] = {
+        type: PIECES.QUEEN,
+        side: SIDES.BLACK
+    }
+    board[7][3] = {
+        type: PIECES.QUEEN,
+        side: SIDES.WHITE
+    }
+
+    /* Kings */
+    board[0][4] = {
+        type: PIECES.KING,
+        side: SIDES.BLACK
+    }
+    board[7][4] = {
+        type: PIECES.KING,
+        side: SIDES.WHITE
+    }
+
+    return board;
 }
