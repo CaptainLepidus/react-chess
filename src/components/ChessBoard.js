@@ -34,7 +34,7 @@ export default class ChessBoard extends React.Component {
         if (select !== null) {
             let selectedPiece = this.state.board[select.y][select.x];
             if (selectedPiece !== null && selectedPiece.side === this.state.turn) { // If we have a piece selected && that piece is the right color
-                if (selectedPiece.type.canMove(select, position, selectedPiece.side, this.state.board, selectedPiece.hasMoved !== undefined)) { // Check movement rules for that piece
+                if (selectedPiece.type.canMove(select, position, selectedPiece.side, this.state.board ) ) { // Check movement rules for that piece
                     let targetPiece = this.state.board[position.y][position.x];
                     if (targetPiece === null || targetPiece.side !== selectedPiece.side) { // We can land either in an empty space or in the space of an enemy piece
                         if (selectedPiece.type.canHop) return true; // Knights don't care about unit collisions
@@ -61,7 +61,7 @@ export default class ChessBoard extends React.Component {
             let selectedPiece = this.state.board[select.y][select.x];
             let targetPiece = this.state.board[position.y][position.x];
             if (targetPiece === null || targetPiece.side !== selectedPiece.side) {
-                selectedPiece.hasMoved = true;
+                selectedPiece.moveCount = selectedPiece.moveCount ? selectedPiece.moveCount + 1: 1;
                 let board = this.state.board;
                 let captures = this.state.captures;
                 if (targetPiece !== null) {
@@ -103,6 +103,14 @@ export default class ChessBoard extends React.Component {
         return renderBoard;
     }
 
+    createCapturedPieces = (pieceType, pieceCount, pieceColor) => {
+        let pieces = [];
+        for(let i = 0; i < pieceCount; i++) {
+            pieces.push(<img className = 'capturedPiece' src={pieceType.icons[pieceColor]} alt={pieceType.name}/>);
+        }
+        return pieces;
+    }
+
     startOver = () => {
         let board = setupBoard(this.state.width, this.state.height);
         this.setState({board: board, captures: {0: {}, 1: {}}, turn: SIDES.WHITE});
@@ -114,22 +122,28 @@ export default class ChessBoard extends React.Component {
                 <div className='chessUI'>
                 <p className='turnCounter'>Turn: {this.state.turn ? 'Black' : 'White'}</p>
                 <p className='captureCounter'>
-                    <div className='captureTitle'>White Captures:</div>
+                    <div className='captureSide'>
+                    <div className='captureTitle'>White Captures</div>
                     {
                         Object.keys(this.state.captures[SIDES.WHITE]).map((type) => {
-                            return <span>{type} x{this.state.captures[SIDES.WHITE][type]} </span>;
+                            return <span>{this.createCapturedPieces(PIECES[type.toUpperCase()], this.state.captures[SIDES.WHITE][type], SIDES.BLACK)}</span>;
                         })
                     }
-                    <div className='captureTitle'>Black Captures:</div>
-                    {
-                        Object.keys(this.state.captures[SIDES.BLACK]).map((type) => {
-                            return <span>{type} x{this.state.captures[SIDES.BLACK][type]} </span>;
-                        })
-                    }
+                    </div>
+                    <div className='captureSide'>
+                        <div className='captureTitle'>Black Captures</div>
+                        {
+                            Object.keys(this.state.captures[SIDES.BLACK]).map((type) => {
+                                return <span>{this.createCapturedPieces(PIECES[type.toUpperCase()], this.state.captures[SIDES.BLACK][type], SIDES.WHITE)}</span>;
+                            })
+                        }
+                    </div>
                 </p>
                 </div>
                 <div className='chessBoard'>
                     <VictoryModal victor = {null} onClick = {this.startOver} />
+
+                    
                     {this.createBoard()}
                 </div>
             </div>

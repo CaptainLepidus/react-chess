@@ -27,9 +27,22 @@
 }
 
 .captureCounter {
-    font-size: 20px;
+    font-size: 22px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .chessUI p {
     margin: 0px;
+}
+
+.captureSide {
+    margin: 4px;
+}
+
+.capturedPiece {
+    width: 32px;
+    height: 32px;
+    vertical-align: text-bottom;
 }
