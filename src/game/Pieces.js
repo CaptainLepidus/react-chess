@@ -16,27 +16,29 @@ import BlackKing from '../icons/bk.svg';
 /** 
  * PIECES
  * id: a numerical id for saving purposes
- * canMove(VECTOR location, VECTOR destination, SIDE side, ARRAY[][] pieces, bool hasMoved): returns whether the piece can move from the location to the destination if the piece is on the given side
+ * canMove(VECTOR location, VECTOR destination, SIDE side, ARRAY[][] pieces): returns whether the piece can move from the location to the destination if the piece is on the given side
  */
 
 const PIECES = {
     PAWN: {
         id: 0,
         name: 'Pawn',
-        canMove: (location, destination, side, pieces, hasMoved) => {
+        canMove: (location, destination, side, pieces) => {
+            let targetPiece = pieces[destination.y][destination.x];
+            let moveCount = pieces[location.y][location.x].moveCount || 0;
             let deltaX = Math.abs(destination.x - location.x);
-            if (deltaX > 1) return false;
+            if (deltaX > 1 ) return false;
             if (side === SIDES.WHITE) {
-                if (hasMoved === false && destination.y === location.y - 2 && deltaX === 0) return true; // Move two squares if haven't moved
+                if (moveCount === 0 && destination.y === location.y - 2 && deltaX === 0) return true; // Move two squares if haven't moved
                 if (destination.y === location.y - 1) {
-                    if (deltaX === 0 && pieces[destination.y][destination.x] === null) return true;
-                    if (deltaX === 1 && pieces[destination.y][destination.x] !== null) return true;
+                    if (deltaX === 0 && targetPiece === null) return true;
+                    if (deltaX === 1 && targetPiece !== null) return true;
                 }
             } else {
-                if (hasMoved === false && destination.y === location.y + 2 && destination.x === location.x) return true;
+                if (moveCount === 0 && destination.y === location.y + 2 && destination.x === location.x) return true;
                 if (destination.y === location.y + 1) {
-                    if (deltaX === 0 && pieces[destination.y][destination.x] === null) return true;
-                    if (deltaX === 1 && pieces[destination.y][destination.x] !== null) return true;
+                    if (deltaX === 0 && targetPiece === null) return true;
+                    if (deltaX === 1 && targetPiece !== null) return true;
                 }
             }
             return false;
