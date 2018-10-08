@@ -22,25 +22,24 @@ export default class ChessBoard extends React.Component {
             turn: SIDES.WHITE,
             selected: null,
             captures: {
-                0: {},
-                1: {}
+                [SIDES.WHTIE]: {},
+                [SIDES.BLACK]: {}
             },
             victor: null
         }
     }
 
-    canSelectedPieceMoveTo = (position) => {
-        let select = this.state.selected;
-        if (select !== null) {
-            let selectedPiece = this.state.board[select.y][select.x];
+    canPieceMoveTo = (location, targetPosition) => {
+        if (location !== null) {
+            let selectedPiece = this.state.board[location.y][location.x];
             if (selectedPiece !== null && selectedPiece.side === this.state.turn) { // If we have a piece selected && that piece is the right color
-                if (selectedPiece.type.canMove(select, position, selectedPiece.side, this.state.board ) ) { // Check movement rules for that piece
-                    let targetPiece = this.state.board[position.y][position.x];
+                if (selectedPiece.type.canMove(location, targetPosition, selectedPiece.side, this.state.board ) ) { // Check movement rules for that piece
+                    let targetPiece = this.state.board[targetPosition.y][targetPosition.x];
                     if (targetPiece === null || targetPiece.side !== selectedPiece.side) { // We can land either in an empty space or in the space of an enemy piece
                         if (selectedPiece.type.canHop) return true; // Knights don't care about unit collisions
-                        let directionVector = {x: Math.sign(position.x - select.x), y: Math.sign(position.y - select.y)};
-                        let x = select.x + directionVector.x, y = select.y + directionVector.y; // Start one tile away from our original position
-                        while(x !== position.x || y !== position.y) { // Keep going until we're one tile away from our target position
+                        let directionVector = {x: Math.sign(targetPosition.x - location.x), y: Math.sign(targetPosition.y - location.y)};
+                        let x = location.x + directionVector.x, y = location.y + directionVector.y; // Start one tile away from our original position
+                        while(x !== targetPosition.x || y !== targetPosition.y) { // Keep going until we're one tile away from our target position
                             if (this.state.board[y][x] !== null) { // If there's something in the way
                                 return false;
                             }
@@ -53,6 +52,10 @@ export default class ChessBoard extends React.Component {
             }
         }
         return false;
+    }
+
+    canSelectedPieceMoveTo = (position) => {
+        return this.canPieceMoveTo(this.state.selected, position);
     }
 
     clickTile = (position) => {
@@ -114,6 +117,40 @@ export default class ChessBoard extends React.Component {
     startOver = () => {
         let board = setupBoard(this.state.width, this.state.height);
         this.setState({board: board, captures: {0: {}, 1: {}}, turn: SIDES.WHITE});
+    }
+
+    isInCheck = () => {
+        let checkState = {
+            [SIDES.WHITE]: false,
+            [SIDES.BLACK]: false
+        }
+        let blackKing = null, whiteKing = null;
+        for(let y = 0; y < this.state.height; y++) {
+            for(let x = 0; x < this.state.width; x++) {
+                let piece = this.state.board[y][x];
+                if (piece !== null && piece.type === PIECES.KING) {
+                    if (piece.side === SIDES.WHITE) {
+                        whiteKing = {x: x, y: y};
+                    } else {
+                        blackKing = {x: x, y: y};
+                    }
+                }
+            }
+        }
+        for(let y = 0; y < this.state.height; y++) {
+            for(let x = 0; x < this.state.width; x++) {
+                let piece = this.state.board[y][x];
+                if (piece !== null) {
+                    if (piece.side === SIDES.WHITE && this.canPieceMoveTo({x:x , y: y}, blackKing)) {
+                        checkState[SIDES.BLACK] = true;
+                    }
+                    if (piece.side === SIDES.BLACK && this.canPieveMoveTo({x: x, y: y}, whiteKing)) {
+                        checkState[SIDES.WHITE] = true;
+                    }
+                }
+            }
+        }
+        return checkState;
     }
 
     render() {
